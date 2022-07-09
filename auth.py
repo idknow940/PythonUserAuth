@@ -27,12 +27,11 @@ class Auth:
                 self.con.commit()
             except sqlite3.Error as e:
                 print(e)
-                sys.exit()
+                sys.exit(1)
         else:
             print("password should be at least {} chars"
                   " and username should be at least {} chars and it should be unique".format(settings.PASS_LENGTH,
                                                                                              settings.USERNAME_LENGTH))
-            sys.exit()
 
     def login(self):
         username = input("")
@@ -41,22 +40,24 @@ class Auth:
         pass_checked = self.check_password(password)
         if pass_checked and username_checked:
             pass_hashed = hashlib.sha256(password.encode("utf-8"))
-            self.cursor.execute(
-                """SELECT * FROM user WHERE username = ? AND password = ? """, (
-                    username, pass_hashed.hexdigest()))
-            users = self.cursor.fetchone()
+            try:
+                self.cursor.execute(
+                    """SELECT * FROM user WHERE username = ? AND password = ? """, (
+                        username, pass_hashed.hexdigest()))
+                users = self.cursor.fetchone()
+            except sqlite3.Error as e:
+                print(e)
+                sys.exit(1)
             if users:
                 self._logged = True
                 print("Successfully logged in as {}!".format(users[1]))
             else:
                 self._logged = False
                 print("Failed to log in!")
-                sys.exit()
         else:
             print("password should be at least {} chars"
                   " and username should be at least {} chars and it should be unique".format(settings.PASS_LENGTH,
                                                                                              settings.USERNAME_LENGTH))
-            sys.exit()
 
     def create_table(self):
         self.cursor.execute(
@@ -104,6 +105,8 @@ def main():
             auth.register()
         case "login":
             auth.login()
+        case "exit":
+            sys.exit(0)
         case _:
             main()
 
