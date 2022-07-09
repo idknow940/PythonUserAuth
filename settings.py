@@ -1,0 +1,3 @@
+USERNAME_LENGTH = 3
+PASS_LENGTH = 3
+DB_FILE_NAME = "user_data.db"
